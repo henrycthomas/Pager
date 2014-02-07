@@ -1,24 +1,20 @@
 ﻿(function($) {
     $.fn.Pager = function (options) {
+        
         var $this = this;
         var opts = $.extend({}, $.fn.Pager.defaults, options);
-        $(this).addClass('pgr_tbl');
+
+        var thisId = $this[0].id;
+        if (thisId == "") {
+            $this.attr({ "id": Math.floor((Math.random() * 100) + 1) });
+            thisId = $this[0].id;
+        }
+        $this.addClass('pgr_tbl');
         if (opts.rows == null) throw "A rows function must be provided, taking params of page, items per page, sort, sort direction, searchterm, callback";
 
-
-
-
-
-
-        var Setup = function(el) {
-            var foot;
-            if (el.find('tfoot').length > 0) {
-                foot = el.find('tfoot')[0];
-            } else {
-                foot = document.createElement('tfoot');
-                el.append(foot);
-            }
-            foot.appendChild(CreatePager());
+        var Setup = function (el) {
+            if(opts.totalPages > 0)
+            $this.after(CreatePager());
         };
         var GetSortDirection = function() {
             return $this.data('pgr_srt_dir') || "pgr_srtdir_up";
@@ -53,7 +49,7 @@
                 p = opts.totalPages;
             if (p != GetPage()) {
                 $this.data('pgr_pg', p);
-                $('.pgr_pager select').val(p);
+                $('#' + thisId + '_pgr_pager select').val(p);
                 Update(opts);
             }
 
@@ -86,7 +82,7 @@
             });
             return search;
         };
-
+        
         var CreatePager = function() {
             var s = document.createElement('select');
             for (var i = 1; i <= opts.totalPages; i++) {
@@ -103,13 +99,13 @@
             var prv = document.createElement('a');
             prv.innerHTML = opts.previousText;
             nxt.innerHTML = opts.nextText;
-            $(prv).addClass('pgr_prv');
-            $(nxt).addClass('pgr_nxt');
+            $(prv).addClass('pgr_prv').addClass('pgr_btn');
+            $(nxt).addClass('pgr_nxt').addClass('pgr_btn');
             var pgr = document.createElement('div');
             pgr.appendChild(prv);
             pgr.appendChild(s);
             pgr.appendChild(nxt);
-            $(pgr).addClass('pgr_pager');
+            $(pgr).addClass('pgr_pager').attr({"id":thisId + '_pgr_pager'});
             $(prv).on("click", function() {
                 SetPage(GetPage() - 1, opts);
             });
@@ -128,16 +124,8 @@
             });
         };
 
-
-
-
-
-
-
-
         SetPage(1, opts);
         SetSort("", opts);
-        
         
         Setup(this);
         if (opts.Sort) {
