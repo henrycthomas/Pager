@@ -1,0 +1,14 @@
+﻿@model int
+@{
+    var rnd = new Random();
+}
+@for (var i = 0; i < Model; i++)
+{
+    <tr>
+        <td>@rnd.Next(1,100)</td>
+        <td>@((char)('a' + rnd.Next(1,24)))</td>
+        <td>@DateTime.Now.AddDays(rnd.Next(-10, 10))</td>
+        <td>@rnd.NextDouble()</td>
+        <td>@rnd.Next(1,100)</td>
+    </tr>
+}

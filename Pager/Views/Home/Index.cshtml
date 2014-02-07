@@ -1,0 +1,41 @@
+﻿<html>
+    <head>
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+        <script src="/Scripts/Pager.js" type="text/javascript"></script>
+        <link href="/Content/Pager.css" rel="stylesheet" type="text/css" />
+        <script>
+            $(function () {
+                $('table').Pager({
+                    rows: function (page, items, sort, sortDirection, searchFilter, callback) {
+                        $.get("/Home/Rows/", { id: items }, function (html) {
+                            callback(html);
+                        });
+                       
+                    },
+                    totalPages: 10
+                });
+            });
+            
+        </script>
+    </head>
+    <body>
+        <h2>Index</h2>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Column1</th>
+                    <th>Column2</th>
+                    <th>Column3</th>
+                    <th>Column4</th>
+                    <th>Column5</th>
+                </tr>
+            </thead>
+            <tbody>
+                @Html.Partial("_Rows", 10)
+            </tbody>
+        </table>
+    </body>
+</html>
+
+
