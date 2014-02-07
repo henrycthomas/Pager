@@ -1,1 +1,55 @@
-﻿
+﻿.pgr_prv {
+    float: left;
+    user-select: none;
+}
+.pgr_nxt {
+    float: right;
+    user-select: none;
+}
+.pgr_btn {
+    display: inline-block;
+    padding: 5px 10px 5px 10px;
+    height: 16px;
+    border-radius: 3px;
+    cursor: pointer;
+    font-weight: bold;
+    color: #7d7d7d;
+    background-color: #fafafa;
+    border: 1px solid #d7d7d7;
+    -webkit-touch-callout: none;
+    user-select: none;
+}
+.pgr_btn:hover {
+    border: 1px solid #4490d5 !important;
+}
+.pgr_pager select {
+    display: block;
+    margin: 0 314px;
+    float: left;
+}
+.pgr_pager {
+    user-select: none;
+    padding: 5px;
+}
+.pgr_search {
+    padding: 5px;
+}
+.pgr_search label {
+    float: right;
+}
+.pgr_srtHeader {
+    
+}
+.pgr_srtHeader a {
+    cursor: pointer;
+    border-bottom: 1px dashed;
+}
+.pgr_srtHeader.pgr_sorted.pgr_asc a:after {
+    content:  "▲";
+}
+ .pgr_srtHeader.pgr_sorted.pgr_desc a:after {
+    content:  "▼";
+}
+.pgr_srtHeader a:hover {
+    border-bottom: 1px solid;
+}

@@ -17,25 +17,22 @@
             $this.after(CreatePager());
         };
         var GetSortDirection = function() {
-            return $this.data('pgr_srt_dir') || "pgr_srtdir_up";
+            return $this.data('pgr_srt_dir') || "asc";
         };
         var SetSortDirection = function(dir) {
             $this.data('pgr_srt_dir', dir);
-            Update(opts);
         };
         var GetSort = function() {
-            return $this.data('pgr_srt') || "";
+            return $this.data('pgr_srt') || 0;
         };
         var SetSort = function(srt) {
             $this.data('pgr_srt', srt);
-            Update(opts);
         };
         var GetSearch = function() {
             return $this.data('pgr_srt_srch') || "";
         };
         var SetSearch = function(srch) {
             $this.data('pgr_srt_srch', srch);
-            Update(opts);
         };
 
         var GetPage = function() {
@@ -47,11 +44,16 @@
                 p = 1;
             if (p > opts.totalPages)
                 p = opts.totalPages;
-            if (p != GetPage()) {
+
+            
+            //$('#' + thisId + "prv").toggle(p > 1);
+            //$('#' + thisId + "nxt").toggle(p < opts.totalPages);
+            
+
                 $this.data('pgr_pg', p);
                 $('#' + thisId + '_pgr_pager select').val(p);
                 Update(opts);
-            }
+        
 
         };
 
@@ -99,8 +101,8 @@
             var prv = document.createElement('a');
             prv.innerHTML = opts.previousText;
             nxt.innerHTML = opts.nextText;
-            $(prv).addClass('pgr_prv').addClass('pgr_btn');
-            $(nxt).addClass('pgr_nxt').addClass('pgr_btn');
+            $(prv).addClass('pgr_prv').addClass('pgr_btn').attr({ "id": thisId + "prv" });
+            $(nxt).addClass('pgr_nxt').addClass('pgr_btn').attr({"id":thisId + "_nxt"});
             var pgr = document.createElement('div');
             pgr.appendChild(prv);
             pgr.appendChild(s);
@@ -118,7 +120,7 @@
 
         var Update = function() {
             var p = GetPage();
-            console.log(opts, "Updating to page " + p, "sort: " + GetSort(), "sort dir: " + GetSortDirection(), "search filter: " + GetSearch());
+            //console.log(opts, "Updating to page " + p, "sort: " + GetSort(), "sort dir: " + GetSortDirection(), "search filter: " + GetSearch());
             opts.rows(GetPage(), opts.itemsPerPage, GetSort(), GetSortDirection(), GetSearch(), function(html) {
                 $this.find('tbody').html(html);
             });
@@ -129,16 +131,17 @@
         
         Setup(this);
         if (opts.Sort) {
-            $(this).find('thead tr th').each(function(i, e) {
+            $(this).find('thead tr th').each(function (i, e) {
+                alert(i);
                 if ($(e).text().trim() != "") {
-                    $(this).data({ "pgr_srtIndex": i }).addClass('pgr_srtHeader').wrapInner('<a/>');
+                    $(this).data({ "pgr_srtIndex": i + 1 }).addClass('pgr_srtHeader').wrapInner('<a/>');
                     $(e).on('click', function() {
-                        var direction = $(this).hasClass("pgr_srtdir_up") ? "pgr_srtdir_down" : "pgr_srtdir_up";
+                        var direction = $(this).hasClass("pgr_asc") ? "desc" : "asc";
                         SetSortDirection(direction, opts);
-                        $($this).find('thead tr th').removeClass('pgr_sorted').removeClass("pgr_srtdir_down").removeClass("pgr_srtdir_up");
-                        $(this).addClass('pgr_sorted').addClass(direction);
-                        SetPage(1, opts);
+                        $this.find('thead tr th').removeClass('pgr_sorted').removeClass("pgr_desc").removeClass("pgr_asc");
+                        $(this).addClass('pgr_sorted').addClass(direction == "desc" ? "pgr_desc" : "pgr_asc");
                         SetSort($(this).data('pgr_srtIndex'), opts);
+                        SetPage(1, opts);
                     });
                 }
             });
