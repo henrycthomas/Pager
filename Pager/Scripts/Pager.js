@@ -1,67 +1,67 @@
 ﻿(function($) {
     $.fn.Pager = function (options) {
-        
-        var $this = this;
-        var opts = $.extend({}, $.fn.Pager.defaults, options);
 
-        var thisId = $this[0].id;
-        if (thisId == "") {
-            $this.attr({ "id": Math.floor((Math.random() * 100) + 1) });
-            thisId = $this[0].id;
+        var pagers = window.pagers || {};
+        var pager = pagers[this[0].id] || {};
+
+        pager.table = this[0];
+        pager.$table = $(pager.table);
+
+
+        pager.opts = $.extend({}, $.fn.Pager.defaults, options);
+
+        if (pager.table.id == "") {
+            pager.$table.attr({ "id": Math.floor((Math.random() * 100) + 1) });
         }
-        $this.addClass('pgr_tbl');
-        if (opts.rows == null) throw "A rows function must be provided, taking params of page, items per page, sort, sort direction, searchterm, callback";
 
-        var Setup = function (el) {
-            if (opts.totalPages > 0) {
-                $this.after(CreatePager());
-                if (opts.Search)
-                    $this.before(CreateSearcher());
+
+        pager.init = function () {
+            if (pager.opts.rows == null) throw "A rows function must be provided, taking params of page, items per page, sort, sort direction, searchterm, callback";
+            pager.$table.addClass('pgr_tbl');
+            if (pager.opts.totalPages > 0) {
+                pager.$table.after(pager.CreatePager());
+                if (pager.opts.Search)
+                    pager.$table.before(pager.CreateSearcher());
             }
+            pager.SetPage(1);
+            pager.SetSort("");
+        }
 
+        pager.GetSortDirection = function () {
+            return pager.$table.data('pgr_srt_dir') || pager.opts.defaultDirection;
         };
-        var GetSortDirection = function() {
-            return $this.data('pgr_srt_dir') || "asc";
+        pager.SetSortDirection = function (dir) {
+            pager.$table.data('pgr_srt_dir', dir);
         };
-        var SetSortDirection = function(dir) {
-            $this.data('pgr_srt_dir', dir);
+        pager.GetSort = function () {
+            return pager.$table.data('pgr_srt') || 0;
         };
-        var GetSort = function() {
-            return $this.data('pgr_srt') || 0;
+        pager.SetSort = function (srt) {
+            pager.$table.data('pgr_srt', srt);
         };
-        var SetSort = function(srt) {
-            $this.data('pgr_srt', srt);
+        pager.GetSearch = function () {
+            return pager.$table.data('pgr_srt_srch') || "";
         };
-        var GetSearch = function() {
-            return $this.data('pgr_srt_srch') || "";
+        pager.SetSearch = function (srch) {
+            pager.$table.data('pgr_srt_srch', srch);
         };
-        var SetSearch = function(srch) {
-            $this.data('pgr_srt_srch', srch);
-        };
-
-        var GetPage = function() {
-            return $this.data('pgr_pg') || 1;
+        pager.GetPage = function () {
+            return pager.$table.data('pgr_pg') || 1;
         };
 
-        var SetPage = function(p, opts) {
+        pager.SetPage = function (p) {
             if (p < 1)
                 p = 1;
-            if (p > opts.totalPages)
-                p = opts.totalPages;
-
-            
-            //$('#' + thisId + "prv").toggle(p > 1);
-            //$('#' + thisId + "nxt").toggle(p < opts.totalPages);
-            
-
-                $this.data('pgr_pg', p);
-                $('#' + thisId + '_pgr_pager select').val(p);
-                Update(opts);
+            if (p > pager.opts.totalPages)
+                p = pager.opts.totalPages;
+            pager.$table.data('pgr_pg', p);
+            $('#' + pager.table.id + '_pgr_pager select').val(p);
+            pager.Update();
         
 
         };
 
-        var CreateSearcher = function() {
+        pager.CreateSearcher = function () {
             var l = document.createElement('label');
             $(l).addClass("pgr_srch_lbl");
             $(l).html('Search: <input type="text" />');
@@ -77,82 +77,82 @@
 
             $(search).find('input').keypress(function(e) {
                 if (e.which == 13) {
-                    SetSearch($(this).val(), opts);
-                    $('.pgr_fltr_lbl').html('Filter: ' + $(this).val() + " <a>" + opts.SearchCancelContent + "</a>");
+                    pager.SetSearch($(this).val());
+                    $('.pgr_fltr_lbl').html('Filter: ' + $(this).val() + " <a>" + pager.opts.SearchCancelContent + "</a>");
                     $('.pgr_fltr_lbl a').on("click", function() {
                         $('.pgr_fltr_lbl, .pgr_srch_lbl').toggle();
-                        SetSearch("", opts);
-                        SetPage(1, opts);
+                        pager.SetSearch("");
+                        pager.SetPage(1);
                     });
                     $('.pgr_fltr_lbl, .pgr_srch_lbl').toggle();
-                    SetPage(1, opts);
+                    pager.SetPage(1);
                 }
             });
             return search;
         };
         
-        var CreatePager = function() {
+        pager.CreatePager = function () {
             var s = document.createElement('select');
-            for (var i = 1; i <= opts.totalPages; i++) {
+            for (var i = 1; i <= pager.opts.totalPages; i++) {
                 var o = document.createElement('option');
                 $(o).attr({ "value": i }).text(i);
                 s.appendChild(o);
             }
 
             $(s).on("change", function() {
-                SetPage(this.value, opts);
-                Update(opts);
+                pager.SetPage(this.value);
+                pager.Update();
             });
             var nxt = document.createElement('a');
             var prv = document.createElement('a');
-            prv.innerHTML = opts.previousText;
-            nxt.innerHTML = opts.nextText;
-            $(prv).addClass('pgr_prv').addClass('pgr_btn').attr({ "id": thisId + "prv" });
-            $(nxt).addClass('pgr_nxt').addClass('pgr_btn').attr({"id":thisId + "_nxt"});
+            prv.innerHTML = pager.opts.previousText;
+            nxt.innerHTML = pager.opts.nextText;
+            $(prv).addClass('pgr_prv').addClass('pgr_btn').attr({ "id": pager.table.id + "prv" });
+            $(nxt).addClass('pgr_nxt').addClass('pgr_btn').attr({"id":pager.table.id + "_nxt"});
             var pgr = document.createElement('div');
             pgr.appendChild(prv);
             pgr.appendChild(s);
             pgr.appendChild(nxt);
-            $(pgr).addClass('pgr_pager').attr({"id":thisId + '_pgr_pager'});
+            $(pgr).addClass('pgr_pager').attr({"id":pager.table.id + '_pgr_pager'});
             $(prv).on("click", function() {
-                SetPage(GetPage() - 1, opts);
+                pager.SetPage(pager.GetPage() - 1);
             });
             $(nxt).on("click", function() {
-                SetPage(GetPage() + 1, opts);
+                pager.SetPage(pager.GetPage() + 1);
 
             });
             return pgr;
         };
 
-        var Update = function() {
-            var p = GetPage();
-            //console.log(opts, "Updating to page " + p, "sort: " + GetSort(), "sort dir: " + GetSortDirection(), "search filter: " + GetSearch());
-            opts.rows(GetPage(), opts.itemsPerPage, GetSort(), GetSortDirection(), GetSearch(), function(html) {
-                $this.find('tbody').html(html);
+        pager.Update = function () {
+            pager.opts.rows(pager.GetPage(), pager.opts.itemsPerPage, pager.GetSort(), pager.GetSortDirection(), pager.GetSearch(), function (html) {
+                pager.$table.find('tbody').html(html);
             });
         };
 
-        SetPage(1, opts);
-        SetSort("", opts);
         
-        Setup(this);
-        if (opts.Sort) {
-            $(this).find('thead tr th').each(function (i, e) {
+        
+        if (pager.opts.Sort) {
+            pager.$table.find('thead tr th').each(function (i, e) {
                 if ($(e).text().trim() != "") {
                     $(this).data({ "pgr_srtIndex": i + 1 }).addClass('pgr_srtHeader').wrapInner('<a/>');
                     $(e).on('click', function() {
                         var direction = $(this).hasClass("pgr_asc") ? "desc" : "asc";
-                        SetSortDirection(direction, opts);
-                        $this.find('thead tr th').removeClass('pgr_sorted').removeClass("pgr_desc").removeClass("pgr_asc");
+                        pager.SetSortDirection(direction);
+                        pager.$table.find('thead tr th').removeClass('pgr_sorted').removeClass("pgr_desc").removeClass("pgr_asc");
                         $(this).addClass('pgr_sorted').addClass(direction == "desc" ? "pgr_desc" : "pgr_asc");
-                        SetSort($(this).data('pgr_srtIndex'), opts);
-                        SetPage(1, opts);
+                        pager.SetSort($(this).data('pgr_srtIndex'));
+                        pager.SetPage(1);
                     });
                 }
             });
         }
-        
-        
+
+        pagers[pager.table.id] = pager;
+        window.pagers = pagers;
+
+        pager.init();
+
     };
     $.fn.Pager.defaults = {
         rows: null,
@@ -163,6 +163,7 @@
         SearchCancelContent: "X",
         nextText: "Next",
         previousText: "Previous",
+        defaultDirection: "asc"
         
     };
 
