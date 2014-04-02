@@ -13,8 +13,12 @@
         if (opts.rows == null) throw "A rows function must be provided, taking params of page, items per page, sort, sort direction, searchterm, callback";
 
         var Setup = function (el) {
-            if(opts.totalPages > 0)
-            $this.after(CreatePager());
+            if (opts.totalPages > 0) {
+                $this.after(CreatePager());
+                if (opts.Search)
+                    $this.before(CreateSearcher());
+            }
+
         };
         var GetSortDirection = function() {
             return $this.data('pgr_srt_dir') || "asc";
@@ -78,8 +82,10 @@
                     $('.pgr_fltr_lbl a').on("click", function() {
                         $('.pgr_fltr_lbl, .pgr_srch_lbl').toggle();
                         SetSearch("", opts);
+                        SetPage(1, opts);
                     });
                     $('.pgr_fltr_lbl, .pgr_srch_lbl').toggle();
+                    SetPage(1, opts);
                 }
             });
             return search;
@@ -132,7 +138,6 @@
         Setup(this);
         if (opts.Sort) {
             $(this).find('thead tr th').each(function (i, e) {
-                alert(i);
                 if ($(e).text().trim() != "") {
                     $(this).data({ "pgr_srtIndex": i + 1 }).addClass('pgr_srtHeader').wrapInner('<a/>');
                     $(e).on('click', function() {
@@ -146,9 +151,7 @@
                 }
             });
         }
-        if (opts.Search) {
-            $this.before(CreateSearcher());
-        }
+        
         
     };
     $.fn.Pager.defaults = {
